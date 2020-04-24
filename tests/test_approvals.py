@@ -9,7 +9,8 @@ import marge.user
 # testing this here is more convenient
 from marge.job import CannotMerge, _get_reviewer_names_and_emails
 
-CODEOWNERS = """
+CODEOWNERS = {
+    "content": """
 # This is an example code owners file, lines starting with a `#` will
 # be ignored.
 
@@ -18,8 +19,11 @@ CODEOWNERS = """
 
 unmatched/* @test5
 """
+}
 
-CODEOWNERS_FULL = """
+# pylint: disable=anomalous-backslash-in-string
+CODEOWNERS_FULL = {
+    "content": """
 # This is an example code owners file, lines starting with a `#` will
 # be ignored.
 
@@ -68,7 +72,8 @@ lib/ @lib-owner
 
 # If the path contains spaces, these need to be escaped like this:
 path\ with\ spaces/ @space-owner
-"""
+"""  # noqa: W605
+}
 
 AWARDS = [
     {
@@ -214,7 +219,12 @@ class TestApprovals:
 
         api.call.assert_not_called()
         assert approvals.info == {
-            'id': 74, 'iid': 6, 'project_id': 1234, 'approvals_left': 2, 'approved_by': [AWARDS[1]],
+            'id': 74,
+            'iid': 6,
+            'project_id': 1234,
+            'approvals_left': 2,
+            'approved_by': [AWARDS[1]],
+            'codeowners': {'default-codeowner', 'ebert', 'test-user1'},
         }
 
     def test_properties(self):
@@ -290,7 +300,9 @@ class TestApprovals:
 
         approvals = Approvals(api, {'id': 74, 'iid': 6, 'project_id': 1234})
 
-        assert approvals.get_codeowners_ce() == {'*': set(['default-codeowner', 'test-user1', 'ebert']), 'unmatched/*': {'test5'}}
+        assert approvals.get_codeowners_ce() == {
+            '*': set(['default-codeowner', 'test-user1', 'ebert']), 'unmatched/*': {'test5'}
+        }
 
     @patch('marge.approvals.Approvals.get_awards_ce', Mock(return_value=AWARDS))
     @patch('marge.approvals.Approvals.get_changes_ce', Mock(return_value=CHANGES))

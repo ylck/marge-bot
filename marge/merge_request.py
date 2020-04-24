@@ -188,6 +188,19 @@ class MergeRequest(gitlab.Resource):
         info = {'id': self.id, 'iid': self.iid, 'project_id': self.project_id}
         approvals = Approvals(self.api, info)
         approvals.refetch_info()
+
+        if not self._api.version().is_ee and approvals.approvals_left > 0 and approvals.codeowners:
+            reviewer_string = ''
+            if len(approvals.codeowners) == 1:
+                reviewer_string = '@' + approvals.codeowners[0]
+            else:
+                reviewer_ats = ["@" + reviewer for reviewer in approvals.codeowners]
+                reviewer_string = '{} or {}'.format(', '.join(reviewer_ats[:-1]), reviewer_ats[-1])
+
+            self.comment(
+                "I can't merge without approval. Please ask {0} to review".format(reviewer_string)
+            )
+
         return approvals
 
     def fetch_commits(self):

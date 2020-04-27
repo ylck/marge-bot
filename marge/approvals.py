@@ -1,5 +1,6 @@
 import logging as log
 import fnmatch
+import re
 import shlex
 
 from . import gitlab
@@ -26,24 +27,29 @@ class Approvals(gitlab.Resource):
     def get_approvers_ce(self):
         """get approvers status using thumbs on merge request
         """
-        owner_globs = self.get_codeowners_ce()
-        if not owner_globs:
+        owner_file = self.get_codeowners_ce()
+        if not owner_file['owners']:
             log.info("No CODEOWNERS file in master, continuing without approvers flow")
             return dict(self._info, approvals_left=0, approved_by=[], codeowners=[])
 
-        codeowners = self.determine_responsible_owners(owner_globs, self.get_changes_ce())
+        code_owners = self.determine_responsible_owners(owner_file['owners'], self.get_changes_ce())
 
-        if not codeowners:
+        if not code_owners:
             log.info("No matched code owners, continuing without approvers flow")
             return dict(self._info, approvals_left=0, approved_by=[], codeowners=[])
 
         awards = self.get_awards_ce()
 
-        up_votes = [e for e in awards if e['name'] == 'thumbsup' and e['user']['username'] in codeowners]
-        approver_count = len(codeowners)
-        approvals_left = max(approver_count - len(up_votes), 0)
+        up_votes = [e for e in awards if e['name'] == 'thumbsup' and e['user']['username'] in code_owners]
 
-        return dict(self._info, approvals_left=approvals_left, approved_by=up_votes, codeowners=codeowners)
+        approvals_required = len(code_owners)
+
+        if owner_file['approvals_required'] > 0:
+            approvals_required = owner_file['approvals_required']
+
+        approvals_left = max(approvals_required - len(up_votes), 0)
+
+        return dict(self._info, approvals_left=approvals_left, approved_by=up_votes, codeowners=code_owners)
 
     def determine_responsible_owners(self, owners_glob, changes):
         owners = set([])
@@ -77,11 +83,18 @@ class Approvals(gitlab.Resource):
     def get_codeowners_ce(self):
         config_file = self._api.repo_file_get(self.project_id, "CODEOWNERS", "master")
         owner_globs = {}
+        required = 0
+        required_regex = re.compile('.*MARGEBOT_MINIMUM_APPROVERS *= *([0-9]+)')
 
         if config_file is None:
             return owner_globs
 
         for line in config_file['content'].splitlines():
+            if 'MARGEBOT_' in line:
+                match = required_regex.match(line)
+                if match:
+                    required = int(match.group(1))
+
             if line != "" and not line.startswith(' ') and not line.startswith('#'):
                 elements = shlex.split(line)
                 glob = elements.pop(0)
@@ -90,7 +103,7 @@ class Approvals(gitlab.Resource):
                 for user in elements:
                     owner_globs[glob].add(user.strip('@'))
 
-        return owner_globs
+        return {"approvals_required": required, "owners": owner_globs}
 
     @property
     def iid(self):

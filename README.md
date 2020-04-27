@@ -193,19 +193,24 @@ ssh-keygen -t ed25519 -C marge-bot@invalid -f marge-bot-ssh-key -P ''
 Add the public key (`marge-bot-ssh-key.pub`) to the user's `SSH Keys` in GitLab
 and keep the private one handy.
 
-### Per project configuration
+### Merge Approvals on Gitlab CE
 
 On GitLab enterprise the [merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/merge_request_approvals.html)
 provide the information how many approvals from whom are needed for
-a merge request.  On GitlLab CE this is done via a configuration file
-called `.marge-bot.yml`.  Currently Marge uses the config file from master
-as config for all merge request.
+a merge request. 
 
-The `.marge-bot.yml` config currently only supports `approver_count`:
-```yaml
+On GitlLab CE this is done via the merge request's award API (thumbup action) and the 
+[CODEOWNERS](https://docs.gitlab.com/ee/user/project/code_owners.html) file.
+Appropriate approvers will be determined from that file and the changes in the MR and minimum approvers can be set 
+by adding a commented line anywhere in that file that contains:
 
-approver_count: 3  # number of "thumbs up" needed, defaults to 1
 ```
+# MARGEBOT_MINIMUM_APPROVERS = 2
+```
+
+Adjust for your needs. If no CODEOWNERS file exist or no matched owners the approval flow will be disabled. If no minimum
+approvers is set, all matched users from CODEOWNERS will be required to approve.
+
 
 ### Running marge-bot in docker (what we do)
 

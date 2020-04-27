@@ -11,6 +11,7 @@ from marge.job import CannotMerge, _get_reviewer_names_and_emails
 
 CODEOWNERS = {
     "content": """
+# MARGEBOT_MINIMUM_APPROVERS = 2
 # This is an example code owners file, lines starting with a `#` will
 # be ignored.
 
@@ -24,6 +25,7 @@ unmatched/* @test5
 # pylint: disable=anomalous-backslash-in-string
 CODEOWNERS_FULL = {
     "content": """
+# MARGEBOT_MINIMUM_APPROVERS=3
 # This is an example code owners file, lines starting with a `#` will
 # be ignored.
 
@@ -48,10 +50,6 @@ CODEOWNERS @multiple @code @owners
 # specify `@legal` and a user with email `janedoe@gitlab.com` as the
 # owner for the LICENSE file
 LICENSE @legal this_does_not_match janedoe@gitlab.com
-
-# Group names can be used to match groups and nested groups to specify
-# them as owners for a file
-README @group @group/with-nested/subgroup
 
 # Ending a path in a `/` will specify the code owners for every file
 # nested in that directory, on any level
@@ -222,7 +220,7 @@ class TestApprovals:
             'id': 74,
             'iid': 6,
             'project_id': 1234,
-            'approvals_left': 2,
+            'approvals_left': 1,
             'approved_by': [AWARDS[1]],
             'codeowners': {'default-codeowner', 'ebert', 'test-user1'},
         }
@@ -280,17 +278,19 @@ class TestApprovals:
         approvals = Approvals(api, {'id': 74, 'iid': 6, 'project_id': 1234})
 
         assert approvals.get_codeowners_ce() == {
-            '#file_with_pound.rb': {'owner-file-with-pound'},
-            '*': {'default-codeowner'},
-            '*.rb': {'ruby-owner'},
-            '/config/': {'config-owner'},
-            '/docs/': {'all-docs'},
-            '/docs/*': {'root-docs'},
-            'CODEOWNERS': {'owners', 'multiple', 'code'},
-            'LICENSE': {'this_does_not_match', 'janedoe@gitlab.com', 'legal'},
-            'README': {'group', 'group/with-nested/subgroup'},
-            'lib/': {'lib-owner'},
-            'path with spaces/': {'space-owner'}
+            'approvals_required': 3,
+            'owners': {
+                '#file_with_pound.rb': {'owner-file-with-pound'},
+                '*': {'default-codeowner'},
+                '*.rb': {'ruby-owner'},
+                '/config/': {'config-owner'},
+                '/docs/': {'all-docs'},
+                '/docs/*': {'root-docs'},
+                'CODEOWNERS': {'owners', 'multiple', 'code'},
+                'LICENSE': {'this_does_not_match', 'janedoe@gitlab.com', 'legal'},
+                'lib/': {'lib-owner'},
+                'path with spaces/': {'space-owner'}
+            }
         }
 
     def test_approvals_ce_get_codeowners_wildcard(self):
@@ -301,7 +301,8 @@ class TestApprovals:
         approvals = Approvals(api, {'id': 74, 'iid': 6, 'project_id': 1234})
 
         assert approvals.get_codeowners_ce() == {
-            '*': set(['default-codeowner', 'test-user1', 'ebert']), 'unmatched/*': {'test5'}
+            'approvals_required': 2,
+            'owners': {'*': {'default-codeowner', 'test-user1', 'ebert'}, 'unmatched/*': {'test5'}}
         }
 
     @patch('marge.approvals.Approvals.get_awards_ce', Mock(return_value=AWARDS))
@@ -316,5 +317,5 @@ class TestApprovals:
 
         result = approvals.get_approvers_ce()
 
-        assert result['approvals_left'] == 2
+        assert result['approvals_left'] == 1
         assert len(result['approved_by']) == 1

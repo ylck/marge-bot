@@ -107,9 +107,11 @@ class Approvals(gitlab.Resource):
 
     @property
     def approvers_string(self):
+        reviewer_string = ""
+
         if len(self.codeowners) == 1:
-            reviewer_string = '@' + self.codeowners[0]
-        else:
+            reviewer_string = '@' + self.codeowners.pop()
+        elif len(self.codeowners) > 1:
             reviewer_ats = ["@" + reviewer for reviewer in self.codeowners]
             reviewer_string = '{} or {}'.format(', '.join(reviewer_ats[:-1]), reviewer_ats[-1])
 
@@ -143,10 +145,10 @@ class Approvals(gitlab.Resource):
     @property
     def codeowners(self):
         """Only used for gitlab CE"""
-        if 'approvers' in self.info:
+        if 'codeowners' in self.info:
             return self.info['codeowners']
 
-        return []
+        return {}
 
     def reapprove(self):
         """Impersonates the approvers and re-approves the merge_request as them.

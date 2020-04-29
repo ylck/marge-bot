@@ -319,3 +319,19 @@ class TestApprovals:
 
         assert result['approvals_left'] == 1
         assert len(result['approved_by']) == 1
+
+    def test_approvers_string_one(self):
+        approvals = Approvals(self.api, {'codeowners': {'ebert'}})
+
+        assert approvals.approvers_string == '@ebert'
+
+    def test_approvers_string_more(self):
+        approvals = Approvals(self.api, {'codeowners': {'ebert', 'test-user1'}})
+
+        assert '@ebert' in approvals.approvers_string
+        assert '@test-user1' in approvals.approvers_string
+
+    def test_approvers_string_empty(self):
+        approvals = Approvals(self.api, {'codeowners': {}})
+
+        assert approvals.approvers_string == ''

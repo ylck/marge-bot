@@ -87,7 +87,7 @@ class Approvals(gitlab.Resource):
         required_regex = re.compile('.*MARGEBOT_MINIMUM_APPROVERS *= *([0-9]+)')
 
         if config_file is None:
-            return owner_globs
+            return {"approvals_required": 0, "owners": {}}
 
         for line in config_file['content'].splitlines():
             if 'MARGEBOT_' in line:
@@ -104,6 +104,16 @@ class Approvals(gitlab.Resource):
                     owner_globs[glob].add(user.strip('@'))
 
         return {"approvals_required": required, "owners": owner_globs}
+
+    @property
+    def approvers_string(self):
+        if len(self.codeowners) == 1:
+            reviewer_string = '@' + self.codeowners[0]
+        else:
+            reviewer_ats = ["@" + reviewer for reviewer in self.codeowners]
+            reviewer_string = '{} or {}'.format(', '.join(reviewer_ats[:-1]), reviewer_ats[-1])
+
+        return reviewer_string
 
     @property
     def iid(self):

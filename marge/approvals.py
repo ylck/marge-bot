@@ -64,7 +64,11 @@ class Approvals(gitlab.Resource):
 
         for change in changes['changes']:
             for glob, users in owners_glob.items():
-                if 'new_path' in change and fnmatch.fnmatch(change['new_path'], glob):
+                test_glob = glob
+                if glob.endswith('/'):
+                    test_glob += "*"
+
+                if 'new_path' in change and fnmatch.fnmatch(change['new_path'], test_glob):
                     owners.update(users)
 
         return owners

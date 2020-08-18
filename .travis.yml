@@ -6,7 +6,7 @@ deploy:
   provider: script
   script: make dockerize && make docker-push VERSION="$TRAVIS_BRANCH"
   on:
-    repo: smarkets/marge-bot
+    repo: ylck/marge-bot
     all_branches: true
     condition: "$TRAVIS_BRANCH = $(cat version) || $TRAVIS_BRANCH = master"
 env:

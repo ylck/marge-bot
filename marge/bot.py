@@ -10,7 +10,7 @@ from . import merge_request as merge_request_module
 from . import single_merge_job
 from . import store
 from .project import AccessLevel, Project
-import approvals
+from . import approvals
 from . import gitlab
 
 MergeRequest = merge_request_module.MergeRequest

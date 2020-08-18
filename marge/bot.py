@@ -16,7 +16,10 @@ from . import gitlab
 MergeRequest = merge_request_module.MergeRequest
 
 
-approvals_left = approvals.Approvals(gitlab.Resource).get_approvers_ce()["approvals_left"]
+class Getapprovals(gitlab.Resource):
+    def get(self):
+        approvals_left = approvals.Approvals().get_approvers_ce()["approvals_left"]
+        return approvals_left
 
 
 class Bot:
@@ -177,7 +180,7 @@ class Bot:
             project=project, merge_request=merge_request, repo=repo,
             options=self._config.merge_opts,
         )
-        if approvals_left <= 1:
+        if Getapprovals.get(self) <= 1:
             merge_job.execute()
 
     def _get_single_job(self, project, merge_request, repo, options):

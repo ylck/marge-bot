@@ -48,3 +48,8 @@ docker-push:
 	docker tag smarkets/marge-bot:$$(cat version) ylck/marge-bot:$(VERSION)
 	docker push ylck/marge-bot:$(VERSION)
 	docker push ylck/marge-bot:latest
+	
+	
+	
+	
+	

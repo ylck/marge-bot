@@ -1,7 +1,7 @@
 VERSION?=$$(git rev-parse --abbrev-ref HEAD)
 
 .PHONY: all
-all: requirements_frozen.txt requirements.nix requirements_override.nix marge-bot dockerize
+all: requirements_frozen.txt requirements.nix requirements_override.nix marge-bot dockerize docker-push
 
 .PHONY: marge-bot
 marge-bot:

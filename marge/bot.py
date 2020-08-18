@@ -18,7 +18,7 @@ MergeRequest = merge_request_module.MergeRequest
 
 class Getapprovals(gitlab.Resource):
     def get(self):
-        approvals_left = approvals.Approvals().get_approvers_ce()["approvals_left"]
+        approvals_left = approvals.Approvals(gitlab.Resource).get_approvers_ce()["approvals_left"]
         return approvals_left
 
 

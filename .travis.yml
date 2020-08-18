@@ -5,6 +5,8 @@ language: nix
 deploy:
   provider: script
   script: make dockerize && make docker-push VERSION="$TRAVIS_BRANCH"
+  on:
+    branch: emoji_approve
 #   on:
 #     repo: ylck/marge-bot
 #     all_branches: true

@@ -15,8 +15,8 @@ from . import gitlab
 
 MergeRequest = merge_request_module.MergeRequest
 
-api = approvals.Approvals()
-approvals_left = api.get_approvers_ce(gitlab.Resource)["approvals_left"]
+
+approvals_left = approvals.Approvals(gitlab.Resource).get_approvers_ce()["approvals_left"]
 
 
 class Bot:

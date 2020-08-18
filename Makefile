@@ -1,7 +1,7 @@
 VERSION?=$$(git rev-parse --abbrev-ref HEAD)
 
 .PHONY: all
-all: requirements_frozen.txt requirements.nix requirements_override.nix marge-bot dockerize
+all: requirements_frozen.txt requirements.nix requirements_override.nix marge-bot dockerize docker-push
 
 .PHONY: marge-bot
 marge-bot:
@@ -35,16 +35,16 @@ docker-push:
 	else \
 		docker login; \
 	fi
-	docker tag smarkets/marge-bot:$$(cat version) smarkets/marge-bot:$(VERSION)
+	docker tag smarkets/marge-bot:$$(cat version) ylck/marge-bot:$(VERSION)
 	if [ "$(VERSION)" = "$$(cat version)" ]; then \
-		docker tag smarkets/marge-bot:$$(cat version) smarkets/marge-bot:latest; \
-		docker tag smarkets/marge-bot:$$(cat version) smarkets/marge-bot:stable; \
-		docker push smarkets/marge-bot:stable; \
-		docker push smarkets/marge-bot:latest; \
+		docker tag smarkets/marge-bot:0.9.2:$$(cat version) ylck/marge-bot:latest; \
+		docker tag smarkets/marge-bot:0.9.2:$$(cat version) ylck/marge-bot:stable; \
+		docker push ylck/marge-bot:stable; \
+		docker push ylck/marge-bot:latest; \
 	fi
-	docker push smarkets/marge-bot:$(VERSION)
+	docker push ylck/marge-bot:$(VERSION)
 	# for backwards compatibility push to previous location
-	docker tag smarkets/marge-bot:$$(cat version) smarketshq/marge-bot:latest
-	docker tag smarkets/marge-bot:$$(cat version) smarketshq/marge-bot:$(VERSION)
-	docker push smarketshq/marge-bot:$(VERSION)
-	docker push smarketshq/marge-bot:latest
+	docker tag ylck/marge-bot:$$(cat version) ylck/marge-bot:latest
+	docker tag smarkets/marge-bot:$$(cat version) ylck/marge-bot:$(VERSION)
+	docker push ylck/marge-bot:$(VERSION)
+	docker push ylck/marge-bot:latest

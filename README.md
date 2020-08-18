@@ -2,6 +2,8 @@
 
 # Marge-bot
 
+
+
 Marge-bot is a merge-bot for GitLab that, beside other goodies,
 implements
 [the Not Rocket Science Rule Of Software Engineering:](http://graydon2.dreamwidth.org/1597.html)

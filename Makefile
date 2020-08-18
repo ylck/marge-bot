@@ -35,7 +35,7 @@ docker-push:
 	else \
 		docker login; \
 	fi
-	docker tag ylck/marge-bot:$$(cat version) ylck/marge-bot:$(VERSION)
+	docker tag smarkets/marge-bot:$$(cat version) ylck/marge-bot:$(VERSION)
 	if [ "$(VERSION)" = "$$(cat version)" ]; then \
 		docker tag smarkets/marge-bot:0.9.2:$$(cat version) ylck/marge-bot:latest; \
 		docker tag smarkets/marge-bot:0.9.2:$$(cat version) ylck/marge-bot:stable; \
